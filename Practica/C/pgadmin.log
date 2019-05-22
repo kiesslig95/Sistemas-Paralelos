@@ -1,0 +1,30 @@
+ERROR  : 12:00:53: Error: Error connecting to the server: no se pudo traducir el nombre «localhhost» a una dirección: Nombre o servicio desconocido
+
+ERROR  : 12:01:15: Error: Error connecting to the server: FATAL:  la autentificación password falló para el usuario «postgres»
+FATAL:  la autentificación password falló para el usuario «postgres»
+
+ERROR  : 12:01:28: Error: Error connecting to the server: FATAL:  la autentificación password falló para el usuario «postgres»
+FATAL:  la autentificación password falló para el usuario «postgres»
+
+ERROR  : 12:01:38: Error: Error connecting to the server: FATAL:  la autentificación password falló para el usuario «postgres»
+FATAL:  la autentificación password falló para el usuario «postgres»
+
+ERROR  : 12:01:56: Error: Error connecting to the server: FATAL:  la autentificación password falló para el usuario «postgres»
+FATAL:  la autentificación password falló para el usuario «postgres»
+
+ERROR  : 12:03:17: Error: Error connecting to the server: FATAL:  la autentificación password falló para el usuario «root»
+FATAL:  la autentificación password falló para el usuario «root»
+
+ERROR  : 12:03:39: Error: Error connecting to the server: FATAL:  la autentificación password falló para el usuario «root»
+FATAL:  la autentificación password falló para el usuario «root»
+
+ERROR  : 12:28:02: Error: File '' couldn't be removed (error 2: No existe el archivo o el directorio)
+ERROR  : 12:29:09: Error: ERROR:  no existe la columna «proisagg»
+LÍNEA 9:  WHERE proisagg = FALSE AND pronamespace = 2200::oid
+                ^
+SUGERENCIA:  Probablemente quiera hacer referencia a la columna «pr.prolang».
+ERROR  : 12:29:16: Error: ERROR:  no existe la columna «proisagg»
+LÍNEA 9:  WHERE proisagg = FALSE AND pronamespace = 2200::oid
+                ^
+SUGERENCIA:  Probablemente quiera hacer referencia a la columna «pr.prolang».
+ERROR  : 12:29:42: Error: Column not found in pgSet: proiswindow
