@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 
   if (irank==0)
   {
-      printf("cargando A 0");
+      //printf("cargando A 0");
       for (i = 0; i < size_vector; i++)
       {
           A[i]=1;
@@ -33,10 +33,10 @@ int main(int argc, char *argv[])
       
   }else if (irank==1)
   {
-      printf("cargando A 1")
+      //printf("cargando A 1")
       for ( i = 0; i < size_vector; i++)
       {
-          A[i]=1;
+          A[i]=2;
       }
       idest  = 0;
       isrc   = 0;
@@ -47,7 +47,6 @@ int main(int argc, char *argv[])
  
   for (i = 0; i < N; i++)
   {
-    
     if (irank==0)
     {
         printf("Task %d has sent the message\n", irank);
@@ -96,6 +95,20 @@ int main(int argc, char *argv[])
         }
         
     }
+    printf("vecto A=( ");
+    for ( j= 0; j < size_vector; j++)
+    {
+        printf("%f ",A[j]);
+    }
+    printf(" )\n");
+
+    printf("vecto B=( ");
+    for ( j= 0; j < size_vector; j++)
+    {
+        printf("%f ",B[j]);
+    }
+    printf("vecto B=( ");
+    
     int aux=0;
     for ( j = 0; j < size_vector; j++)
     {
@@ -106,6 +119,7 @@ int main(int argc, char *argv[])
     {
         A[j]=X+B[j];
     }
+
     
   }
   
