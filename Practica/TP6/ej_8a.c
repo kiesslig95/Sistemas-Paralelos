@@ -97,12 +97,12 @@ int main(int argc, char *argv[])
         
     }
     int aux=0;
-    for ( j = 0; j < size_vector; i++)
+    for ( j = 0; j < size_vector; j++)
     {
         aux=A[j];
         X += aux*aux*aux;
     }
-    for ( j = 0; j < size_vector; i++)
+    for ( j = 0; j < size_vector; j++)
     {
         A[j]=X+B[j];
     }
