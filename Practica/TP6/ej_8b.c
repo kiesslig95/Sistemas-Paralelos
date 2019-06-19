@@ -1,8 +1,15 @@
 #include <stdio.h>
 #include <mpi.h>
+#include <time.h>
 
-#define N 10
+#define N 4
 #define size_vector 4
+
+double sampleTime() {
+ struct timespec tv;
+ clock_gettime(CLOCK_MONOTONIC_RAW, &tv);
+ return ((double)tv.tv_sec+((double)tv.tv_nsec)/1000000000.0);
+}
 
 int main(int argc, char *argv[])		
 {
@@ -12,6 +19,7 @@ int main(int argc, char *argv[])
   float A[size_vector];
   float B[size_vector];
   int carga=0;
+  double tiempo = sampleTime();
   MPI_Status recv_status;
   MPI_Request request; // para el Isend 
 
@@ -58,34 +66,41 @@ int main(int argc, char *argv[])
             /* tag          = */istag, 
             /* communicator = */MPI_COMM_WORLD,
             /* request      = */&request);
+        
+        
 
-        /*no puede no ser bloqueante porque me tengo que asegurar que tengo el vector para poder operar */
-        MPI_Recv(
+        MPI_Irecv(
                 /* data         = */&B, 
                 /* count        = */size_vector, 
                 /* datatype     = */MPI_FLOAT, 
                 /* source       = */isrc, 
                 /* tag          = */iretag, 
                 /* communicator = */ MPI_COMM_WORLD,
-                /* status       = */&recv_status);
+                /* request      = */&request);
         printf("Task %d has received the message\n", irank);
+
+        // Aquí va el cómputo a solapar con la comunicación...
+        printf("vecto A=( ");
+        for ( j= 0; j < size_vector; j++)
+        {
+            printf("%f ",A[j]);
+        }
+        printf(" )\n");
+
+        int aux=0;
+        for ( j = 0; j < size_vector; j++)
+        {
+            aux=A[j];
+            X += aux*aux*aux;
+        }
+        MPI_Wait(&request, &recv_status);    
     }else
     {
         if (irank==1)
         {
-            /*no puede no ser bloqueante porque me tengo que asegurar que tengo el vector para poder operar */
-            MPI_Recv(
-                /* data         = */&B, 
-                /* count        = */size_vector, 
-                /* datatype     = */MPI_FLOAT, 
-                /* source       = */isrc, 
-                /* tag          = */iretag, 
-                /* communicator = */ MPI_COMM_WORLD,
-                /* status      = */&recv_status);  
+            
 
             printf("Task %d has received the message\n", irank); 
-
-            printf("Task %d has sent the message\n", irank);
             MPI_Isend(
                 /* data         = */&A, 
                 /* count        = */size_vector, 
@@ -94,16 +109,36 @@ int main(int argc, char *argv[])
                 /* tag          = */istag, 
                 /* communicator = */MPI_COMM_WORLD,
                 /* status       = */&request);
-                
+
+            MPI_Irecv(
+                /* data         = */&B, 
+                /* count        = */size_vector, 
+                /* datatype     = */MPI_FLOAT, 
+                /* source       = */isrc, 
+                /* tag          = */iretag, 
+                /* communicator = */ MPI_COMM_WORLD,
+                /* request      = */&request);
+            printf("Task %d has sent the message\n", irank);
+            
+            // Aquí va el cómputo a solapar con la comunicación...
+            printf("vecto A=( ");
+            for ( j= 0; j < size_vector; j++)
+            {
+                printf("%f ",A[j]);
+            }
+            printf(" )\n");
+
+            int aux=0;
+            for ( j = 0; j < size_vector; j++)
+            {
+                aux=A[j];
+                X += aux*aux*aux;
+            }
+            MPI_Wait(&request, &recv_status);     
         }
         
     }
-    printf("vecto A=( ");
-    for ( j= 0; j < size_vector; j++)
-    {
-        printf("%f ",A[j]);
-    }
-    printf(" )\n");
+    
 
     printf("vecto B=( ");
     for ( j= 0; j < size_vector; j++)
@@ -112,12 +147,6 @@ int main(int argc, char *argv[])
     }
     printf(") \n");
     
-    int aux=0;
-    for ( j = 0; j < size_vector; j++)
-    {
-        aux=A[j];
-        X += aux*aux*aux;
-    }
     for ( j = 0; j < size_vector; j++)
     {
         A[j]=X+B[j];
@@ -127,6 +156,7 @@ int main(int argc, char *argv[])
   }
   
   MPI_Finalize();
-
+    tiempo = sampleTime() - tiempo;
+    printf("tiempo transcurrido solapado: %f segundos\n..........................................\n", tiempo);
   return 0;
 }

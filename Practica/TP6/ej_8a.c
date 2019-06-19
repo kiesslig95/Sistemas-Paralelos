@@ -1,8 +1,15 @@
 #include <stdio.h>
 #include <mpi.h>
+#include <time.h>
 
 #define N 10
 #define size_vector 4
+
+double sampleTime() {
+ struct timespec tv;
+ clock_gettime(CLOCK_MONOTONIC_RAW, &tv);
+ return ((double)tv.tv_sec+((double)tv.tv_nsec)/1000000000.0);
+}
 
 int main(int argc, char *argv[])		
 {
@@ -12,6 +19,7 @@ int main(int argc, char *argv[])
   float A[size_vector];
   float B[size_vector];
   int carga=0;
+  double tiempo = sampleTime();
   MPI_Status recv_status;
   MPI_Request request; // para el Isend 
 
@@ -107,7 +115,7 @@ int main(int argc, char *argv[])
     {
         printf("%f ",B[j]);
     }
-    printf("vecto B=( ");
+    printf(") \n");
     
     int aux=0;
     for ( j = 0; j < size_vector; j++)
@@ -124,6 +132,7 @@ int main(int argc, char *argv[])
   }
   
   MPI_Finalize();
-
+    tiempo = sampleTime() - tiempo;
+    printf("tiempo transcurrido no Solapado: %f segundos\n..........................................\n", tiempo);
   return 0;
 }
