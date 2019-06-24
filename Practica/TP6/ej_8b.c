@@ -2,7 +2,7 @@
 #include <mpi.h>
 #include <time.h>
 
-#define N 4
+#define N 100000 //28 seg
 #define size_vector 4
 
 double sampleTime() {
