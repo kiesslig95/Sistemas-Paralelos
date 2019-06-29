@@ -1,0 +1,153 @@
+#include <stdio.h>
+#include "mpi.h"
+#include <time.h>
+#include <unistd.h>
+
+#define N 10000 // tamaño arreglo
+#define FRango 400000 // fin rango primos
+#define IRango 1 //incio rango primos
+
+int primo(int n){  //retorna 0 cuando no es primo y 1 cuando es primo
+    int i, res, mitad;
+    i=2;
+    res = n > 1;
+    mitad =n/2;
+    while (res!=0 && i<= mitad)
+    {
+        res= n%i;
+        i++;
+    }
+    return res;
+}
+
+double sampleTime() {
+ struct timespec tv;
+ clock_gettime(CLOCK_MONOTONIC_RAW, &tv);
+ return ((double)tv.tv_sec+((double)tv.tv_nsec)/1000000000.0);
+}
+
+int main(int argc, char *argv[])		
+{
+    /* para trabajar con bloques */
+    int cantElem=(FRango - IRango)+1;
+    /* tamaño bloques */ 
+    int bloque=(cantElem/100);
+    /* cantidad de bloques */ 
+    int cantBloques= cantElem/bloque;
+    /* rango auxiliar numero igual o menos a N*/ 
+    int rangoAux;
+
+	int rank,i,j,esPrimo;
+    /* datos que se envian a todos los procesos  */
+    /* 1) IRango
+       2) FRango
+       3) tamaño bloque
+       4) Rango aux final */
+    int datos[3];
+    /*  arreglo donde guardo los primos encontrados uno por proceso */
+    int arreglo[N];
+    double tiempo=sampleTime();
+
+    MPI_Init(&argc, &argv);
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank); 
+    printf("Rank %d \n",rank);
+    int world_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+
+    if (rank == 0) {
+        // if root process we read the value to broadcast
+        //printf("Rank %d inicializando buffer\n",rank);
+        if((FRango-IRango+1)%bloque!=0){
+            rangoAux=((FRango-IRango+1)/bloque)*bloque;
+        }else
+        {
+            rangoAux=FRango;
+        }
+        
+        /* inicio rango */
+	    datos[0]=IRango;
+        /* fin rango */
+        datos[1]=FRango;
+        /* tamaño bloque */
+        datos[2]=bloque;
+        /* rango fin aux */
+        datos[3]=rangoAux;
+    } 
+    //else {
+    //	printf("process %d: Before MPI_Bcast, value is %d\n", rank, rango[1]); 
+	//}
+
+    // each processor calls MPI_Bcast, data is broadcast from root processor and ends up in everyone value variable
+    // root process uses MPI_Bcast to broadcast the value, each other process uses MPI_Bcast to receive the broadcast value
+    
+    //MPI_Barrier(MPI_COMM_WORLD); 
+    MPI_Bcast(&datos, 4, MPI_INT, 0, MPI_COMM_WORLD);
+
+    //printf("process %d: After MPI_Bcast, value is %d\n", rank, rango[1]);
+
+    j=datos[2]*rank;
+    i=0;
+    int aux;
+
+    while (j<datos[3])
+    {
+        int count=j+datos[2];
+        for (aux = j; aux < count; aux++)
+        {
+            esPrimo=primo(aux);
+            if (esPrimo==1)
+            {
+                arreglo[i]=j;
+                i++;
+                //printf("process %d: encontro primo %d \n", rank,j);
+            }
+        }
+        j+=world_size*datos[2];
+    }
+    
+    //j=rank;
+    //i=0;
+    if (datos[1]!=datos[3])
+    {
+        j=datos[3]+rank;
+        while (j<datos[1])
+        {
+            esPrimo=primo(j);
+            if (esPrimo==1)
+            {
+                arreglo[i]=j;
+                i++;
+                //printf("process %d: encontro primo %d \n", rank,j);
+            }
+            j+=world_size;
+        }
+    }
+    printf("Proceso rank %d \n",rank);
+    printf("Cant de Procesos %d \n",world_size);
+    printf("Proceso[%d]rango Ini %d \n",rank,datos[0]);
+    printf("Proceso[%d]rango Fin %d \n",rank,datos[1]);
+    printf("Proceso[%d] bloque %d \n",rank,datos[2]);
+    printf("Proceso[%d]rango Aux %d \n",rank,datos[3]);
+    i=0;
+    for (i = 0; i < world_size; i++)
+    {
+        MPI_Barrier(MPI_COMM_WORLD); 
+        if(rank==i){
+            printf("process %d: Arreglo Primos=[", rank);
+            for ( j= 0; j < N; j++)
+            {
+                printf("%d ",arreglo[j]);
+                if(arreglo[j]==0){
+                    j=N+1;
+                }
+            }
+            printf(" ]\n");
+        }
+    }
+    tiempo = sampleTime() - tiempo;
+    printf("Soy el proceso número: %d  mi tiempo fue de: %f \n",rank,tiempo);
+    MPI_Finalize();
+
+	return 0;
+}
